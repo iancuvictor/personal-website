@@ -1,11 +1,21 @@
+import { BrowserRouter, Route, Routes } from 'react-router'
 import './App.css'
 import { Navbar } from './components/index.js'
+import { useContext } from 'react'
+import { GlobalStatesContext } from './contexts/GlobalStatesContext.js'
+import { ProjectsPage } from './components/index.js'
 
 function App() {
+  const { darkMode } = useContext(GlobalStatesContext)
 
-  return <div>
-    <Navbar/>
-  </div>
+  return <BrowserRouter>
+    <div className={`${darkMode ? 'bg-white' : 'bg-white'} min-h-screen`}>
+      <Navbar />
+      <Routes>
+      <Route path='/' Component={ProjectsPage}/>
+      </Routes>
+    </div>
+  </BrowserRouter>
 }
 
 export default App

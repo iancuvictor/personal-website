@@ -3,7 +3,7 @@ import { GlobalStatesContext } from "../../contexts/GlobalStatesContext"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGithub } from "@fortawesome/free-brands-svg-icons";
 import { NavLink } from "react-router";
-import { faArrowRightFromBracket, faEnvelope, faMagnifyingGlass, faPenToSquare } from "@fortawesome/free-solid-svg-icons";
+import { faArrowRightFromBracket, faEnvelope, faFileArrowDown, faMagnifyingGlass, faMoon, faPenToSquare, faSun } from "@fortawesome/free-solid-svg-icons";
 import { AdminStateContext } from "../../contexts/AdminStateContext";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
@@ -40,16 +40,16 @@ export default function Navbar() {
             </div>
             <div className="flex flex-row gap-5 items-center justify-center font-[600]">
                 <NavLink to={'/'} className={navbarNavlink}>Projects</NavLink>
-                <NavLink to={'/cv'} className={navbarNavlink}>CV</NavLink>
                 <NavLink to={'/about'} className={navbarNavlink}>About me</NavLink>
                 <NavLink to={'/contact'} className={navbarNavlink}>Contact</NavLink>
                 <a href="https://github.com/iancuvictor" target="_blank"><FontAwesomeIcon icon={faGithub} /> Github</a>
+                <button className={`cursor-pointer hover:text-rose-500 duration-50 ease-out`}><FontAwesomeIcon icon={faFileArrowDown}/> CV</button>
                 <button onClick={() => {
                     setDarkMode(!darkMode)
                     localStorage.setItem('darkMode', JSON.stringify(!darkMode));
                 }}
                     className={`${darkMode} cursor-pointer`}
-                >{darkMode ? 'Dark Mode' : 'Light Mode'}</button>
+                ><FontAwesomeIcon className={darkMode ? 'text-blue-500' : 'text-yellow-500'} icon={darkMode ? faMoon : faSun }/></button>
                 {admin ? <button onClick={() => logOut.mutate()}
                     className="bg-rose-500 pl-2 pr-2 pt-1 pb-1 rounded-md cursor-pointer">
                     <FontAwesomeIcon icon={faArrowRightFromBracket} /></button>

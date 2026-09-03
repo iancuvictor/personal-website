@@ -2,6 +2,7 @@ import express from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import requireAdmin from '../middleware/admin.js';
+import AboutDescription from '../schemas/aboutDescription';
 
 const routes = express.Router();
 
@@ -29,6 +30,23 @@ routes.post('/logout', requireAdmin, async (req, res) => {
         res.status(200).json({message: 'Logged Out'})
     } catch(err) {
         res.status(403).json({message: 'Unauthorized'})
+    }
+})
+
+routes.put('/updateAboutText', requireAdmin, async (req, res) => {
+    let description = await AboutDescription.find()[0];
+    try{
+
+        if(description !== undefined){
+            await AboutDescription.updateOne({_id: description[0]._id}, {$set: req.body})
+            res.status(200).json({message: 'Text updated'})
+        } else {
+            await AboutDescription.create({text: req.body.text});
+            res.status(200).json({message: 'Text updated'})
+        }
+    } catch(err) {
+        res.json({message: 'An error has occured'});
+        console.log(err);
     }
 })
 

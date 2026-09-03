@@ -16,6 +16,6 @@ createRoot(document.getElementById('root')!).render(
           <App />
         </GlobalStatesProvider>
       </AdminStateProvider>
-    </StrictMode>,
+    </StrictMode>
   </QueryClientProvider>
 )

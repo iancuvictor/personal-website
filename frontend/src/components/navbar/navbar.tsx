@@ -5,7 +5,7 @@ import { faGithub } from "@fortawesome/free-brands-svg-icons";
 import { NavLink } from "react-router";
 import { faArrowRightFromBracket, faEnvelope, faMagnifyingGlass, faPenToSquare } from "@fortawesome/free-solid-svg-icons";
 import { AdminStateContext } from "../../contexts/AdminStateContext";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { toast } from "sonner";
 
@@ -14,13 +14,18 @@ const API_URL = import.meta.env.VITE_API_URL;
 export default function Navbar() {
     const { admin } = useContext(AdminStateContext);
     const { darkMode, setDarkMode } = useContext(GlobalStatesContext);
+    const queryClient = useQueryClient()
 
     const navbarNavlink = ({ isActive }) => `${isActive ? 'underline underline-offset-4' : 'underline-none'}`
 
     const logOut = useMutation({
-        mutationFn: () => axios.post(`${API_URL}/admin/logout`),
+        mutationFn: () => axios.post(`${API_URL}/admin/logout`, {}, { withCredentials: true }),
         onSuccess: () => {
             toast.success(`Successfully logged out`)
+            queryClient.invalidateQueries({queryKey: ['admin']})
+        },
+        onError: () => {
+            toast.error(`An error has occured`)
         }
     })
 

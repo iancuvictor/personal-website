@@ -7,21 +7,19 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 export function AdminStateProvider({ children }: { children: ReactNode }) {
 
-    
+
     const { data, isLoading, error } = useQuery({
         queryKey: ['admin'],
         queryFn: () => axios.get(`${API_URL}/admin`, { withCredentials: true })
     })
 
-    if(isLoading) return null;
-    if (error) return null;
-    
-    const admin = data?.data?.isAdmin || false
-    console.log(admin);
+    if (isLoading) return null;
 
-    if(!isLoading && data !== undefined){
-        return <AdminStateContext.Provider value={{ admin }}>
+    const admin = error ? false : data?.data?.isAdmin
+
+    console.log(data)
+
+    return <AdminStateContext.Provider value={{ admin }}>
         {children}
     </AdminStateContext.Provider>
-    }
 }

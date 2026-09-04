@@ -2,7 +2,8 @@ import express from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import requireAdmin from '../middleware/admin.js';
-import AboutDescription from '../schemas/aboutDescription';
+import AboutDescription from '../schemas/aboutDescription.js';
+import Project from '../schemas/project.js';
 
 const routes = express.Router();
 
@@ -33,6 +34,17 @@ routes.post('/logout', requireAdmin, async (req, res) => {
     }
 })
 
+routes.post('/createProject', requireAdmin, async (req, res) => {
+    console.log(req.body);
+    try{
+        await Project.create(req.body)
+        res.status(200).json({message: 'Project added successfully'})
+    } catch(err) {
+        console.log(err);
+        res.status(500).json({message: 'An error has occured'})
+    }
+})
+
 routes.put('/updateAboutText', requireAdmin, async (req, res) => {
     let description = await AboutDescription.find()[0];
     try{
@@ -47,6 +59,17 @@ routes.put('/updateAboutText', requireAdmin, async (req, res) => {
     } catch(err) {
         res.json({message: 'An error has occured'});
         console.log(err);
+    }
+})
+
+routes.put('/project/:slug', requireAdmin, async (req, res) => {
+    try{
+        console.log(req.body);
+        await Project.updateOne({slug: req.params.slug}, {$set: req.body})
+        res.status(200).json({message: 'Project successfully updated'})
+    } catch(err) {
+        const errorCode = err?.code;
+        res.status(errorCode).json({message: 'An error has occured'});
     }
 })
 

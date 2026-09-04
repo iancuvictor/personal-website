@@ -3,7 +3,7 @@ import './App.css'
 import { Navbar } from './components/index.js'
 import { useContext } from 'react'
 import { GlobalStatesContext } from './contexts/GlobalStatesContext.js'
-import { ProjectsPage, AboutPage, AdminPage } from './components/index.js'
+import { ProjectsPage, ProjectPage, AboutPage, AdminPage } from './components/index.js'
 import { AdminStateContext } from './contexts/AdminStateContext.js'
 import { Toaster } from 'sonner';
 
@@ -27,6 +27,7 @@ function App() {
           <Route path='/' Component={ProjectsPage} />
           <Route path='/about' Component={AboutPage} />
           <Route path='/admin' Component={AdminPage} />
+          <Route path='/projects/:slug' Component={ProjectPage} />
         </Routes>
       </div>
     </div>

@@ -17,8 +17,6 @@ export function AdminStateProvider({ children }: { children: ReactNode }) {
 
     const admin = error ? false : data?.data?.isAdmin
 
-    console.log(data)
-
     return <AdminStateContext.Provider value={{ admin }}>
         {children}
     </AdminStateContext.Provider>

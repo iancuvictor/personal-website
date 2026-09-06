@@ -4,8 +4,24 @@ import jwt from 'jsonwebtoken';
 import requireAdmin from '../middleware/admin.js';
 import AboutDescription from '../schemas/aboutDescription.js';
 import Project from '../schemas/project.js';
+import multer from 'multer';
+import path from 'path';
 
 const routes = express.Router();
+
+const projectPhotos = process.env.PROJECT_PHOTOS_FOLDER
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, projectPhotos)
+    },
+    filename: (req, file, cb) => {
+        const identifier = Date.now() + '-'
+        cb(null, file.fieldname)
+    }
+})
+
+const upload = multer({ storage: storage })
 
 
 routes.get('/', requireAdmin, async (req, res) => {
@@ -43,6 +59,11 @@ routes.post('/createProject', requireAdmin, async (req, res) => {
         console.log(err);
         res.status(500).json({message: 'An error has occured'})
     }
+})
+
+routes.put('/project/:slug/images', requireAdmin, async (req, res) => {
+    console.log(req.file)
+    res.json({message: 'worked'})
 })
 
 routes.put('/updateAboutText', requireAdmin, async (req, res) => {

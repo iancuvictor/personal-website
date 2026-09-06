@@ -9,27 +9,26 @@ import path from 'path';
 
 const routes = express.Router();
 
-const projectPhotos = process.env.PROJECT_PHOTOS_FOLDER
+const uploadsPath = process.env.UPLOADS_PATH
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, projectPhotos)
+        cb(null, `${uploadsPath}/projectPhotos`)
     },
     filename: (req, file, cb) => {
-        const identifier = Date.now() + '-'
-        cb(null, file.fieldname)
+        const identifier = req.params.slug + '_' + Date.now() + path.extname(file.originalname)
+        cb(null, identifier)
     }
 })
 
 const upload = multer({ storage: storage })
 
-
 routes.get('/', requireAdmin, async (req, res) => {
-    res.status(200).json({message: 'Authorized', isAdmin: true})
+    res.status(200).json({ message: 'Authorized', isAdmin: true })
 })
 
 routes.post('/login', async (req, res) => {
-    const {username, password} = req.body;
+    const { username, password } = req.body;
     let passwordCheck = await bcrypt.compare(password, process.env.ADMIN_PASSWORD_HASH)
     if (process.env.ADMIN_USERNAME === username && passwordCheck) {
         let adminToken = jwt.sign({ role: 'admin' }, process.env.JWT_SECRET, { expiresIn: '24h' })
@@ -42,55 +41,66 @@ routes.post('/login', async (req, res) => {
 })
 
 routes.post('/logout', requireAdmin, async (req, res) => {
-    try{
+    try {
         res.clearCookie('token')
-        res.status(200).json({message: 'Logged Out'})
-    } catch(err) {
-        res.status(403).json({message: 'Unauthorized'})
+        res.status(200).json({ message: 'Logged Out' })
+    } catch (err) {
+        res.status(403).json({ message: 'Unauthorized' })
     }
 })
 
 routes.post('/createProject', requireAdmin, async (req, res) => {
     console.log(req.body);
-    try{
+    try {
         await Project.create(req.body)
-        res.status(200).json({message: 'Project added successfully'})
-    } catch(err) {
+        res.status(200).json({ message: 'Project added successfully' })
+    } catch (err) {
         console.log(err);
-        res.status(500).json({message: 'An error has occured'})
+        res.status(500).json({ message: 'An error has occured' })
     }
 })
 
-routes.put('/project/:slug/images', requireAdmin, async (req, res) => {
-    console.log(req.file)
-    res.json({message: 'worked'})
+routes.put('/project/:slug/images', requireAdmin, upload.array('photo'), async (req, res) => {
+    const data = req.files.map((photo) => {
+        return { path: photo.filename }
+    })
+
+    console.log(data);
+    try {
+        await Project.updateOne({ _id: req.body._id }, { $set: {photos: data }})
+        res.status(200).json({ message: 'worked' })
+    } catch (err) {
+        console.log(err);
+        const errorCode = err?.code;
+        res.status(errorCode).json({ message: 'An error has occured' })
+    }
 })
 
 routes.put('/updateAboutText', requireAdmin, async (req, res) => {
     let description = await AboutDescription.find()[0];
-    try{
+    try {
 
-        if(description !== undefined){
-            await AboutDescription.updateOne({_id: description[0]._id}, {$set: req.body})
-            res.status(200).json({message: 'Text updated'})
+        if (description !== undefined) {
+            await AboutDescription.updateOne({ _id: description[0]._id }, { $set: req.body })
+            res.status(200).json({ message: 'Text updated' })
         } else {
-            await AboutDescription.create({text: req.body.text});
-            res.status(200).json({message: 'Text updated'})
+            await AboutDescription.create({ text: req.body.text });
+            res.status(200).json({ message: 'Text updated' })
         }
-    } catch(err) {
-        res.json({message: 'An error has occured'});
+    } catch (err) {
+        res.json({ message: 'An error has occured' });
         console.log(err);
     }
 })
 
 routes.put('/project/:slug', requireAdmin, async (req, res) => {
-    try{
+    try {
         console.log(req.body);
-        await Project.updateOne({slug: req.params.slug}, {$set: req.body})
-        res.status(200).json({message: 'Project successfully updated'})
-    } catch(err) {
+        await Project.updateOne({ slug: req.params.slug }, { $set: req.body })
+        res.status(200).json({ message: 'Project successfully updated' })
+    } catch (err) {
         const errorCode = err?.code;
-        res.status(errorCode).json({message: 'An error has occured'});
+        res.status(errorCode).json({ message: 'An error has occured' });
     }
 })
 

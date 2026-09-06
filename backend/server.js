@@ -1,10 +1,11 @@
 import express from 'express';
 import mongoose from 'mongoose';
-import http, { createServer } from 'http';
+import { createServer } from 'http';
 import cors from 'cors';
 import publicData from './routes/public.js';
 import adminRoutes from './routes/admin.js';
 import cookieParser from 'cookie-parser';
+import path from 'path';
 
 const port = process.env.PORT;
 
@@ -23,6 +24,8 @@ mongoose.connect(process.env.MONGO_URL)
 
 app.use(express.json());
 app.use(cookieParser());
+app.use('/api/uploads', express.static(path.join('uploads')))
+
 app.use('/api/public', publicData);
 app.use('/api/admin', adminRoutes);
 app.get('/', (req, res) => {

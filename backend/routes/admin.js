@@ -67,7 +67,7 @@ routes.put('/project/:slug/images', requireAdmin, upload.array('photo'), async (
 
     console.log(data);
     try {
-        await Project.updateOne({ _id: req.body._id }, { $set: {photos: data }})
+        await Project.updateOne({ _id: req.body._id }, { $set: { photos: data } })
         res.status(200).json({ message: 'worked' })
     } catch (err) {
         console.log(err);
@@ -101,6 +101,17 @@ routes.put('/project/:slug', requireAdmin, async (req, res) => {
     } catch (err) {
         const errorCode = err?.code;
         res.status(errorCode).json({ message: 'An error has occured' });
+    }
+})
+
+routes.delete('/project/images/:id', requireAdmin, async (req, res) => {
+    try {
+        await Project.updateOne({ 'photos._id': req.params.id }, { $pull: { photos: { _id: req.params.id } } })
+        res.status(200).json({message: `Image successfully removed`})
+    } catch (err) {
+        const errCode = err?.code
+        res.status(errCode).json({ message: `An error has occured` })
+        console.log(err);
     }
 })
 

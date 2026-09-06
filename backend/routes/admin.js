@@ -9,20 +9,19 @@ import path from 'path';
 
 const routes = express.Router();
 
-const projectPhotos = process.env.PROJECT_PHOTOS_FOLDER
+const uploadsPath = process.env.UPLOADS_PATH
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, projectPhotos)
+        cb(null, `${uploadsPath}/project photos`)
     },
     filename: (req, file, cb) => {
-        const identifier = Date.now() + '-'
-        cb(null, file.fieldname)
+        const identifier = req.params.slug + '_' + Date.now() + path.extname(file.originalname)
+        cb(null, identifier)
     }
 })
 
 const upload = multer({ storage: storage })
-
 
 routes.get('/', requireAdmin, async (req, res) => {
     res.status(200).json({message: 'Authorized', isAdmin: true})
@@ -61,8 +60,8 @@ routes.post('/createProject', requireAdmin, async (req, res) => {
     }
 })
 
-routes.put('/project/:slug/images', requireAdmin, async (req, res) => {
-    console.log(req.file)
+routes.put('/project/:slug/images', requireAdmin, upload.array('photo') , async (req, res) => {
+    console.log(req.files)
     res.json({message: 'worked'})
 })
 

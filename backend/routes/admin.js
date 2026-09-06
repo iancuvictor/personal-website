@@ -62,7 +62,7 @@ routes.post('/createProject', requireAdmin, async (req, res) => {
 
 routes.put('/project/:slug/images', requireAdmin, upload.array('photo'), async (req, res) => {
     const data = req.files.map((photo) => {
-        return { path: photo.path }
+        return { path: photo.filename }
     })
 
     console.log(data);

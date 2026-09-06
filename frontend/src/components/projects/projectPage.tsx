@@ -76,8 +76,6 @@ export default function ProjectPage() {
         }
     })
 
-    console.log(data);
-
     if (isLoading) return <FontAwesomeIcon icon={faSpinner} />
 
     return <div className={`${darkMode ? 'text-white' : 'text-black'} font-mozilla`}>
@@ -112,7 +110,7 @@ export default function ProjectPage() {
 
             // public display
             : <div className="flex flex-col items-center gap-2">
-                <img src={data.photos[0].path}/>
+                {data.photos.length > 0 && <img src={`${API_URL}/uploads/projectPhotos/${data.photos[0].path}`}/>}
                 <div className="flex flex-row gap-3 items-center">
                     <h1 className="font-[700] text-[50px]">{data.title}</h1>
                     <a href={data.github} target="_blank">

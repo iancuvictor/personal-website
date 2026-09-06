@@ -62,6 +62,7 @@ export default function ProjectPage() {
     const updatePhotos = useMutation({
         mutationFn: (photos: File[]) => {
             const formData = new FormData();
+            formData.append('_id', data._id);
             photos.forEach((photo) => {
                 formData.append('photo', photo);
             })
@@ -74,6 +75,8 @@ export default function ProjectPage() {
             toast.error(`Error uploading photos`)
         }
     })
+
+    console.log(data);
 
     if (isLoading) return <FontAwesomeIcon icon={faSpinner} />
 
@@ -109,6 +112,7 @@ export default function ProjectPage() {
 
             // public display
             : <div className="flex flex-col items-center gap-2">
+                <img src={data.photos[0].path}/>
                 <div className="flex flex-row gap-3 items-center">
                     <h1 className="font-[700] text-[50px]">{data.title}</h1>
                     <a href={data.github} target="_blank">

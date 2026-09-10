@@ -8,6 +8,6 @@ export default function requireAdmin(req, res, next) {
         next();
     } catch {
         res.status(403).json({ message: 'Unauthorized' })
-        console.log('not access')
+        console.log('no access')
     }
 }

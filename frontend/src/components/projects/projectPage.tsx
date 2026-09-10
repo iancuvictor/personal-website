@@ -89,11 +89,11 @@ export default function ProjectPage() {
     })
 
     const changeImage = useMutation({
-        mutationFn: ({slug, photo, id}: {slug: string, photo: File, id: string}) => {
+        mutationFn: ({ slug, photo, id }: { slug: string, photo: File, id: string }) => {
             const formData = new FormData();
             formData.append('photo', photo)
             return axios.put(`${API_URL}/admin/project/${slug}/images/updateImage/${id}`, formData, { withCredentials: true })
-            },
+        },
         onSuccess: () => {
             toast.success(`Photo successfully updated`)
             queryClient.invalidateQueries({ queryKey: [`project-${slug}`] })
@@ -104,30 +104,34 @@ export default function ProjectPage() {
     })
 
     const updateImage = useRef(null);
+    const selectPhotos = useRef(null);
 
     if (isLoading) return <FontAwesomeIcon icon={faSpinner} />
 
     return <div className={`${darkMode ? 'text-white' : 'text-black'} font-mozilla`}>
 
         {admin ? <div className="flex flex-col items-center gap-5">
-            <input type="text" defaultValue={data.title}
-                onChange={(e) => setForm({ ...form, title: e.target.value })}
-                className={`${darkMode && 'bg-mauve-950'} text-[50px] font-[700] text-center ring-1 ring-mauve-900 rounded-md`} />
-            <div className="flex flex-col gap-2">
-                <span>Github repository</span>
-                <input type="text" defaultValue={data.github}
-                    onChange={(e) => setForm({ ...form, github: e.target.value })}
-                    className={`${darkMode && 'bg-mauve-950'} text-blue-500 w-200 p-2 ring-1 ring-mauve-900 rounded-md`} />
-            </div>
-            <div className="flex flex-col gap-2">
-                <span>Website URL</span>
-                <input type="text" defaultValue={data.url}
-                    onChange={(e) => setForm({ ...form, url: e.target.value })}
-                    className={`${darkMode && 'bg-mauve-950'} text-blue-500 w-200 p-2 ring-1 ring-mauve-900 rounded-md`} />
+            <div className="flex flex-col items-center gap-1">
+
+                <input type="text" defaultValue={data.title}
+                    onChange={(e) => setForm({ ...form, title: e.target.value })}
+                    className={`${darkMode && 'bg-mauve-950'} text-[20px] font-[700] text-center ring-1 ring-mauve-900 rounded-md`} />
+                <div className="flex flex-col text-[13px]">
+                    <span>Github repository</span>
+                    <input type="text" defaultValue={data.github}
+                        onChange={(e) => setForm({ ...form, github: e.target.value })}
+                        className={`${darkMode && 'bg-mauve-950'} text-blue-500 w-200 p-2 ring-1 ring-mauve-900 rounded-md`} />
+                </div>
+                <div className="flex flex-col text-[13px]">
+                    <span>Website URL</span>
+                    <input type="text" defaultValue={data.url}
+                        onChange={(e) => setForm({ ...form, url: e.target.value })}
+                        className={`${darkMode && 'bg-mauve-950'} text-blue-500 w-200 p-2 ring-1 ring-mauve-900 rounded-md`} />
+                </div>
             </div>
             <div className="flex flex-row flex-wrap justify-center gap-10">
                 {data.photos.map((photo) => {
-                    return <div className={`${darkMode ? '' : 'shadow-md shadow-black/40'} group relative w-80 h-45 overflow-hidden rounded-md`}>
+                    return <div key={photo._id} className={`${darkMode ? '' : 'shadow-md shadow-black/40'} group relative w-80 h-45 overflow-hidden rounded-md`}>
                         {data.photos.length > 0 && <img src={`${API_URL}/uploads/projectPhotos/${photo.path}`}
                             className="h-full w-full object-cover" />}
                         <div className="opacity-0 group-hover:opacity-100 duration-75 ease-out
@@ -139,31 +143,41 @@ export default function ProjectPage() {
                             <div
                                 className="text-white hover:text-blue-200 cursor-pointer">
                                 <FontAwesomeIcon icon={faRepeat} onClick={() => updateImage.current.click()} />
-                                <input type="file" ref={updateImage} onChange={(e) => changeImage.mutate({slug: slug, photo: e.target.files[0], id: photo._id})}
+                                <input type="file" ref={updateImage} onChange={(e) => changeImage.mutate({ slug: slug, photo: e.target.files[0], id: photo._id })}
                                     className="absolute top-0 left-0 opacity-0 z-0" />
                             </div>
                         </div>
                     </div>
                 })}
             </div>
-            <input type="file" multiple onChange={(e) => setPhotos(Array.from(e.target.files))} />
-            <button onClick={() => updatePhotos.mutate(photos)} disabled={photos.length === 0}
-                className={`${photos.length === 0 ? '' : `${darkMode ? 'bg-mauve-950 hover:bg-mauve-900 active:bg-mauve-950'
-                    : 'hover:bg-mauve-200'} cursor-pointer`} 
-                p-2 ring-1 ring-mauve-950 rounded-xs w-fit`}>Upload photos</button>
-            {/* <input type="date" value={data.publishedAt} 
-            onChange={(e) => setForm({...form, publishedAt: e.target.value})}/> */}
-            <span>Description</span>
-            <div className="w-[80%]">
-                <MDEditor
-                    value={form.description}
-                    onChange={(value) => setForm({ ...form, description: value })}
-                    height={400}
-                />
+            <div className="flex flex-row gap-5 items-center">
+                <div className="relative">
+                    <input type="file" multiple onChange={(e) => setPhotos(Array.from(e.target.files))}
+                        className="invisible absolute top-0 left-0" ref={selectPhotos} />
+                    <button className={`${darkMode ? '' :
+                        'hover:bg-gray-100 active:bg-gray-200'} cursor-pointer ring-1 p-2 rounded-xs`}
+                        onClick={() => selectPhotos.current.click()}
+                    >Select files {selectPhotos.current && `[${selectPhotos.current.files.length}]`}</button>
+                </div>
+                <button onClick={() => updatePhotos.mutate(photos)} disabled={photos.length === 0}
+                    className={`${photos.length === 0 ? 'bg-gray-500 text-gray-700' : `${darkMode ? 'bg-mauve-950 hover:bg-mauve-900 active:bg-mauve-950'
+                        : 'hover:bg-mauve-200'} cursor-pointer`} 
+                    p-2 ring-1 ring-mauve-950 rounded-xs w-fit`}>Upload photos</button>
+            </div>
+            <div className="flex flex-col items-center gap-1 w-full">
+                <span>Description</span>
+                <div className="w-[80%]">
+                    <MDEditor
+                        value={form.description}
+                        onChange={(value) => setForm({ ...form, description: value })}
+                        height={400}
+                        data-color-mode={darkMode ? 'dark' : 'light'}
+                    />
+                </div>
             </div>
             <button onClick={() => saveChanges.mutate(form)}
-                className="cursor-pointer p-2 ring-1 ring-mauve-900 
-            bg-mauve-950 hover:bg-mauve-900 active:bg-mauve-950 rounded-xs w-fit">Save changes</button>
+                className={`${darkMode ? 'ring-mauve-900 bg-mauve-950 hover:bg-mauve-900 active:bg-mauve-950'
+                    : 'bg-white hover:bg-gray-100 active:bg-gray-200'} cursor-pointer w-fit p-2 ring-1 rounded-xs`}>Save changes</button>
         </div>
 
             // public display

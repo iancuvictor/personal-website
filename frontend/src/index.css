@@ -1,5 +1,24 @@
 @import url('https://fonts.googleapis.com/css2?family=Mozilla+Text:wght@200..700&display=swap');
 @import "tailwindcss";
+
 @theme {
   --font-mozilla: "Mozilla Text", sans-serif;
+}
+
+[data-color-mode="dark"].w-md-editor {
+  --md-editor-background-color: #1d161e !important;
+  --md-editor-box-shadow-color: #79697B;
+}
+
+[data-color-mode="light"].w-md-editor {
+  --md-editor-background-color: #F3F4F6 !important;
+  --md-editor-box-shadow-color: #000000;
+}
+
+[data-color-mode="dark"] .wmde-markdown {
+  --color-canvas-default: #1d161e !important;
+}
+
+[data-color-mode="light"] .wmde-markdown {
+  --color-canvas-default: #F3F4F6 !important;
 }

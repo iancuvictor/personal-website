@@ -5,6 +5,7 @@ import axios from "axios";
 import { toast } from 'sonner';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
+import { useNavigate } from "react-router";
 
 type Form = {
     username: string,
@@ -15,7 +16,8 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 export default function AdminPage() {
     const { darkMode } = useContext(GlobalStatesContext);
-    const queryClient = useQueryClient()
+    const queryClient = useQueryClient();
+    const navigate = useNavigate();
 
     const [form, setForm] = useState({
         username: '',
@@ -32,6 +34,7 @@ export default function AdminPage() {
         onSuccess: () => {
             console.log('connected as admin');
             queryClient.invalidateQueries({ queryKey: ['admin'] })
+            navigate(-1);
         },
         onError: () => {
             toast.error(`Wrong password or username`)

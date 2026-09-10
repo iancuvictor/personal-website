@@ -30,8 +30,8 @@ export default function ProjectsPage() {
     return <div className={`${darkMode ? 'text-white' : 'text-black'} w-full flex flex-col gap-5 items-center justify-center font-mozilla`}>
         <div className="flex flex-row items-center gap-5">
             <h1 className="font-[700] text-[24px]">PROJECTS</h1>
-            {admin && <button className="w-8 h-8 ring-1 ring-mauve-900 bg-mauve-950 
-        hover:bg-mauve-900 active:bg-black cursor-pointer"
+            {admin && <button className={`${darkMode ? `bg-mauve-950 hover:bg-mauve-900 active:bg-black` 
+            : 'bg-white hover:bg-gray-200 active:bg-white' } w-8 h-8 ring-1 ring-mauve-900 cursor-pointer rounded-xs duration-75 ease-out`}
                 onClick={() => setCreateProject(true)}>
                 <FontAwesomeIcon icon={faPlus} />
             </button>}
@@ -43,7 +43,7 @@ export default function ProjectsPage() {
         </div>
 
         {/* creating projects */}
-        {createProject && <CreateProjectScreen setCreateProject={setCreateProject} />}
+        {createProject && admin && <CreateProjectScreen setCreateProject={setCreateProject} />}
         <div className="flex flex-row justify-evenly flex-wrap gap-5 w-full pl-20 pr-20">
             {data.filter((project) => project.title.toLowerCase().replace(/\s+/g, '')
             .includes(searchQuery.toLowerCase().replace(/\s+/g, '')))

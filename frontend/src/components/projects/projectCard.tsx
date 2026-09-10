@@ -4,12 +4,16 @@ import { NavLink } from "react-router"
 import increment from '../../../utils/increment.js';
 import { useState } from "react";
 
+type Photo = {
+    path: string
+}
+
 type Data = {
     title: string,
     slug: string,
     github: string,
     publishedAt: string,
-    photos: [],
+    photos: Photo[],
     techStack: []
 }
 
@@ -23,7 +27,7 @@ const API_URL = import.meta.env.VITE_API_URL
 export default function ProjectCard({ data }: DataProps) {
     const [imageIndex, setImageIndex] = useState(0);
 
-    return <div className="select-none relative flex flex-col gap-1 rounded-md w-100 font-mozilla shadow-md shadow-rose-500">
+    return <div className="select-none relative flex flex-col gap-1 rounded-md w-100 font-mozilla ring-1">
         <NavLink to={`/projects/${data.slug}`} className={`z-1 absolute top-0 left-0 w-full h-full cursor-pointer`}/>
         <div className="relative w-full h-50 flex flex-row gap-2 items-center justify-between">
             <FontAwesomeIcon onClick={() => increment('substract', imageIndex, setImageIndex, data.photos)} icon={faCircleChevronLeft}

@@ -1,10 +1,10 @@
-import { useContext, useState } from "react"
+import { useContext, useRef, useState } from "react"
 import { GlobalStatesContext } from "../../contexts/GlobalStatesContext"
 import { useParams } from "react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFileArrowUp, faSpinner, faTrashCan } from "@fortawesome/free-solid-svg-icons";
+import { faFileArrowUp, faRepeat, faSpinner, faTrashCan } from "@fortawesome/free-solid-svg-icons";
 import { AdminStateContext } from "../../contexts/AdminStateContext";
 import { toast } from "sonner";
 import { faGithub } from "@fortawesome/free-brands-svg-icons";
@@ -62,7 +62,6 @@ export default function ProjectPage() {
     const updatePhotos = useMutation({
         mutationFn: (photos: File[]) => {
             const formData = new FormData();
-            formData.append('_id', data._id);
             photos.forEach((photo) => {
                 formData.append('photo', photo);
             })
@@ -71,6 +70,7 @@ export default function ProjectPage() {
         onSuccess: () => {
             toast.success(`Photos uploaded successfully`)
             queryClient.invalidateQueries({ queryKey: [`project-${slug}`] })
+            setPhotos([])
         },
         onError: () => {
             toast.error(`Error uploading photos`)
@@ -88,6 +88,23 @@ export default function ProjectPage() {
         }
     })
 
+    const changeImage = useMutation({
+        mutationFn: ({slug, photo, id}: {slug: string, photo: File, id: string}) => {
+            const formData = new FormData();
+            formData.append('photo', photo)
+            return axios.put(`${API_URL}/admin/project/${slug}/images/updateImage/${id}`, formData, { withCredentials: true })
+            },
+        onSuccess: () => {
+            toast.success(`Photo successfully updated`)
+            queryClient.invalidateQueries({ queryKey: [`project-${slug}`] })
+        },
+        onError: () => {
+            toast.error(`An error has occured while updating the image`)
+        }
+    })
+
+    const updateImage = useRef(null);
+
     if (isLoading) return <FontAwesomeIcon icon={faSpinner} />
 
     return <div className={`${darkMode ? 'text-white' : 'text-black'} font-mozilla`}>
@@ -95,40 +112,49 @@ export default function ProjectPage() {
         {admin ? <div className="flex flex-col items-center gap-5">
             <input type="text" defaultValue={data.title}
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
-                className="text-[50px] font-[700] text-center bg-mauve-950 ring-1 ring-mauve-900 rounded-md" />
-
-            <div className="flex flex-row gap-10">
+                className={`${darkMode && 'bg-mauve-950'} text-[50px] font-[700] text-center ring-1 ring-mauve-900 rounded-md`} />
+            <div className="flex flex-col gap-2">
+                <span>Github repository</span>
+                <input type="text" defaultValue={data.github}
+                    onChange={(e) => setForm({ ...form, github: e.target.value })}
+                    className={`${darkMode && 'bg-mauve-950'} text-blue-500 w-200 p-2 ring-1 ring-mauve-900 rounded-md`} />
+            </div>
+            <div className="flex flex-col gap-2">
+                <span>Website URL</span>
+                <input type="text" defaultValue={data.url}
+                    onChange={(e) => setForm({ ...form, url: e.target.value })}
+                    className={`${darkMode && 'bg-mauve-950'} text-blue-500 w-200 p-2 ring-1 ring-mauve-900 rounded-md`} />
+            </div>
+            <div className="flex flex-row flex-wrap justify-center gap-10">
                 {data.photos.map((photo) => {
-                    return <div className="group relative w-80 h-45 overflow-hidden">
+                    return <div className={`${darkMode ? '' : 'shadow-md shadow-black/40'} group relative w-80 h-45 overflow-hidden rounded-md`}>
                         {data.photos.length > 0 && <img src={`${API_URL}/uploads/projectPhotos/${photo.path}`}
                             className="h-full w-full object-cover" />}
                         <div className="opacity-0 group-hover:opacity-100 duration-75 ease-out
                         z-1 absolute flex flex-row gap-5 items-center justify-center top-0 left-0 h-full w-full bg-black/60 text-[20px]">
                             <button onClick={() => deletePhoto.mutate(photo._id)}
-                                className="hover:text-rose-500 cursor-pointer">
+                                className="text-white hover:text-rose-500 cursor-pointer">
                                 <FontAwesomeIcon icon={faTrashCan} />
                             </button>
-                            <button className="hover:text-blue-200 cursor-pointer">
-                                <FontAwesomeIcon icon={faFileArrowUp} />
-                            </button>
+                            <div
+                                className="text-white hover:text-blue-200 cursor-pointer">
+                                <FontAwesomeIcon icon={faRepeat} onClick={() => updateImage.current.click()} />
+                                <input type="file" ref={updateImage} onChange={(e) => changeImage.mutate({slug: slug, photo: e.target.files[0], id: photo._id})}
+                                    className="absolute top-0 left-0 opacity-0 z-0" />
+                            </div>
                         </div>
                     </div>
                 })}
             </div>
             <input type="file" multiple onChange={(e) => setPhotos(Array.from(e.target.files))} />
-            <button onClick={() => updatePhotos.mutate(photos)}
-                className="cursor-pointer p-2 ring-1 ring-mauve-900 
-            bg-mauve-950 hover:bg-mauve-900 active:bg-mauve-950 rounded-xs w-fit">Upload photos</button>
-            <span>Website URL</span>
-            <input type="text" defaultValue={data.url}
-                onChange={(e) => setForm({ ...form, url: e.target.value })} />
-            <span>Github repository</span>
-            <input type="text" defaultValue={data.github}
-                onChange={(e) => setForm({ ...form, github: e.target.value })} />
+            <button onClick={() => updatePhotos.mutate(photos)} disabled={photos.length === 0}
+                className={`${photos.length === 0 ? '' : `${darkMode ? 'bg-mauve-950 hover:bg-mauve-900 active:bg-mauve-950'
+                    : 'hover:bg-mauve-200'} cursor-pointer`} 
+                p-2 ring-1 ring-mauve-950 rounded-xs w-fit`}>Upload photos</button>
             {/* <input type="date" value={data.publishedAt} 
             onChange={(e) => setForm({...form, publishedAt: e.target.value})}/> */}
             <span>Description</span>
-            <div className="max-w-[80%]">
+            <div className="w-[80%]">
                 <MDEditor
                     value={form.description}
                     onChange={(value) => setForm({ ...form, description: value })}

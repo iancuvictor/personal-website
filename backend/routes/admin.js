@@ -65,9 +65,8 @@ routes.put('/project/:slug/images', requireAdmin, upload.array('photo'), async (
         return { path: photo.filename }
     })
 
-    console.log(data);
     try {
-        await Project.updateOne({ _id: req.body._id }, { $set: { photos: data } })
+        await Project.updateOne({ slug: req.params.slug }, { $push: { photos: { $each: data } } })
         res.status(200).json({ message: 'worked' })
     } catch (err) {
         console.log(err);
@@ -104,10 +103,21 @@ routes.put('/project/:slug', requireAdmin, async (req, res) => {
     }
 })
 
+routes.put('/project/:slug/images/updateImage/:id', requireAdmin, upload.single('photo'), async (req, res) => {
+    try{
+        await Project.updateOne({'photos._id': req.params.id}, {$set: {'photos.$.path': req.file.filename}})
+        res.status(200).json({message: 'Image successfully updated'})
+    } catch(err) {
+        const errCode = err?.code
+        res.status(errCode || 500).json({message: 'An error has occured while updating this image'})
+        console.log(err);
+    }
+})
+
 routes.delete('/project/images/:id', requireAdmin, async (req, res) => {
     try {
         await Project.updateOne({ 'photos._id': req.params.id }, { $pull: { photos: { _id: req.params.id } } })
-        res.status(200).json({message: `Image successfully removed`})
+        res.status(200).json({ message: `Image successfully removed` })
     } catch (err) {
         const errCode = err?.code
         res.status(errCode).json({ message: `An error has occured` })
